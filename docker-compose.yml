@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: keploy-postgres
+    environment:
+      POSTGRES_USER: keploy
+      POSTGRES_PASSWORD: keploy123
+      POSTGRES_DB: keploydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keploy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - keploy-network
+
+  # Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: keploy-app
+    environment:
+      DATABASE_URL: postgresql://keploy:keploy123@postgres:5432/keploydb?schema=public
+      PORT: 8000
+      NODE_ENV: production
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma db push && npm start"
+    networks:
+      - keploy-network
+    volumes:
+      - ./keploy:/app/keploy
+
+  # Keploy for Record Mode
+  keploy-record:
+    image: ghcr.io/keploy/keploy:latest
+    container_name: keploy-record
+    command: 'record -c "docker compose up app" --delay 10'
+    ports:
+      - "16789:16789"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/app
+    networks:
+      - keploy-network
+    profiles:
+      - record
+
+  # Keploy for Test Mode
+  keploy-test:
+    image: ghcr.io/keploy/keploy:latest
+    container_name: keploy-test
+    command: 'test -c "docker compose up app" --delay 10'
+    ports:
+      - "16789:16789"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/app
+    networks:
+      - keploy-network
+    profiles:
+      - test
+
+networks:
+  keploy-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

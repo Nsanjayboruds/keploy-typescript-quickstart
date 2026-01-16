@@ -1,0 +1,105 @@
+# Example API Requests
+
+## Health Check
+GET http://localhost:8000/health
+
+---
+
+## Root Endpoint
+GET http://localhost:8000/
+
+---
+
+## Create User - Alice
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+  "name": "Alice Johnson",
+  "email": "alice@example.com"
+}
+
+---
+
+## Create User - Bob
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+  "name": "Bob Smith",
+  "email": "bob@example.com"
+}
+
+---
+
+## Create User - Charlie
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+  "name": "Charlie Brown",
+  "email": "charlie@example.com"
+}
+
+---
+
+## Get All Users
+GET http://localhost:8000/users
+
+---
+
+## Get User by ID
+GET http://localhost:8000/users/1
+
+---
+
+## Update User
+PUT http://localhost:8000/users/1
+Content-Type: application/json
+
+{
+  "name": "Alice Williams",
+  "email": "alice.williams@example.com"
+}
+
+---
+
+## Update User - Partial
+PUT http://localhost:8000/users/1
+Content-Type: application/json
+
+{
+  "name": "Alice Updated"
+}
+
+---
+
+## Delete User
+DELETE http://localhost:8000/users/1
+
+---
+
+## Error Cases
+
+### Get Non-existent User
+GET http://localhost:8000/users/9999
+
+### Invalid User ID
+GET http://localhost:8000/users/abc
+
+### Create User - Missing Name
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+  "email": "invalid@example.com"
+}
+
+### Create User - Duplicate Email
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "alice@example.com"
+}
